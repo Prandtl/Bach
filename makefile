@@ -21,4 +21,4 @@ example: example.o chkopts
 	${RM} example.o
 
 runExample:
-	-@${MPIEXEC}  -n 3 ./example
+	-@${MPIEXEC}  -n 1 ./example -info
