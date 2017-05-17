@@ -1,11 +1,13 @@
+import sys
+import os
+
+import re
+
 import numpy as np
 import math
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 import pylab
-import re
-
-filename = "example.out"
 
 def getTestData(h):
     def testFunction(point):
@@ -37,6 +39,17 @@ def getTestData(h):
         g = getGradientIn(point)
         return -getGradientIn(point)
     return testFunction, getGradientIn, getAntiGradientIn
+
+
+if len(sys.argv) == 1:
+    print("call ariadna with output filename like that:")
+    print("\tpython ariadna.py example.out")
+    exit()
+filename = str(sys.argv[1])
+
+if not os.path.isfile(filename):
+    print("invalid filename")
+    exit()
 
 x = np.arange(-12, 12, 0.1)
 y = np.arange(-12, 12, 0.1)
