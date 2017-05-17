@@ -1,4 +1,4 @@
-ALL: toast
+ALL: toast, example
 
 CFLAGS =
 FFLAGS =
@@ -22,3 +22,7 @@ example: example.o chkopts
 
 runExample:
 	-@${MPIEXEC}  -n 1 ./example -info
+
+runShowExample:
+	-@${MPIEXEC}  -n 1 ./example -info
+	python3 ariadna.py example.out
