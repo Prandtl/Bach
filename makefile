@@ -4,7 +4,7 @@ CFLAGS =
 FFLAGS =
 CPPFLAGS =
 FPPFLAGS =
-CLEANFILES = toast, example
+CLEANFILES = toast, example, example.out
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
