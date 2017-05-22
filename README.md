@@ -2,7 +2,6 @@
 ## How to use
 To look at example results:
 ```zsh
-make example
 make runShowExample
 ```
 ## Files
