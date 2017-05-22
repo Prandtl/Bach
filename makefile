@@ -23,6 +23,6 @@ example: example.o chkopts
 runExample:
 	-@${MPIEXEC}  -n 1 ./example -info
 
-runShowExample:
+runShowExample: example
 	-@${MPIEXEC}  -n 1 ./example -info
 	python3 ariadna.py example.out

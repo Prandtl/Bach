@@ -22,7 +22,7 @@ int main(int argc,char **argv)
         PetscMPIInt size,rank;                   /* number of processes running */
         AppCtx user;                        /* user-defined application context */
 
-        PetscInt  iter = 0;
+        PetscInt iter = 0;
         PetscReal f;
         Vec G;
 
@@ -35,7 +35,7 @@ int main(int argc,char **argv)
 
         /* Initialize problem parameters */
         user.alpha = 0.01;
-        user.maxIter = 10;
+        user.maxIter = 5000;
         /* Check for command line arguments to override defaults */
         ierr = PetscOptionsGetReal(NULL,NULL,"-alpha",&user.alpha,&flg); CHKERRQ(ierr);
 
@@ -72,11 +72,9 @@ int main(int argc,char **argv)
         PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
 
         /*solve*/
-        delta_norm = user.alpha * 2;  //set delta twice as big as alpha to step into while loop
-        iter = 0;//does not work
+        iter = 0;
 
-        while(delta_norm > user.alpha)
-        {
+        do {
                 VecView(x, viewer);
                 ierr = VecCopy(x, x_old); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
@@ -84,14 +82,16 @@ int main(int argc,char **argv)
                 ierr = VecWAXPY(delta, -1, x_old, x); CHKERRQ(ierr); // delta = x - x_old
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
 
-                PetscInfo1(NULL, "iteration: %g\n", iter);
+                PetscInfo1(NULL, "iteration: %i\n", iter);
                 PetscInfo1(NULL, "delta: %g\n", delta_norm);
 
-                // iter+=1;
-                // if(iter>user.maxIter)
-                //         PetscInfo1(NULL, "did not converge in maxIter (%g) iterations\n", user.maxIter);
-                // break;
-        }
+                iter+=1;
+                if(iter>user.maxIter)
+                {
+                        PetscInfo1(NULL, "did not converge in maxIter (%i) iterations\n", user.maxIter);
+                        break;
+                }
+        } while(delta_norm > user.alpha);
         ierr = TaoDestroy(&tao); CHKERRQ(ierr);
         ierr = VecDestroy(&x); CHKERRQ(ierr);
         ierr = VecDestroy(&G); CHKERRQ(ierr);

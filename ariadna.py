@@ -78,5 +78,5 @@ for line in f:
 x_list = [x for [x, y] in vecs]
 y_list = [y for [x, y] in vecs]
 
-plt.plot(x_list, y_list, 'r--')
+plt.plot(x_list, y_list, 'ro', x_list, y_list, 'k')
 plt.show()
