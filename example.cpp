@@ -54,7 +54,7 @@ int main(int argc,char **argv)
         ierr = VecSet(x, zero); CHKERRQ(ierr);
         ierr = VecGetArray(x, &xinitial); CHKERRQ(ierr);
         xinitial[0]=11.0;
-        xinitial[1]=7.0;
+        xinitial[1]=11.0;
         ierr = VecRestoreArray(x, &xinitial); CHKERRQ(ierr);
         ierr = TaoSetInitialVector(tao,x); CHKERRQ(ierr);
         ierr = VecSet(x_old, zero); CHKERRQ(ierr);

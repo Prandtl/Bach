@@ -67,7 +67,7 @@ vec = []
 vecs = []
 for line in f:
     trimmed = line.strip()
-    if re.match("^\d+?\.\d*?$", trimmed) is None:
+    if re.match("^-?\d+?\.\d*?$", trimmed) is None:
         if(len(vec)!=0):
             vecs.append(vec)
             vec=[]

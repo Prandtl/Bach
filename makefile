@@ -32,7 +32,7 @@ hogwild: hogwild.o chkopts
 	${RM} hogwild.o
 
 runHogwild:
-	-@${MPIEXEC}  -n 1 ./hogwild -info
+	-@${MPIEXEC}  -n 2 ./hogwild -info
 
 runShowHogwild: hogwild
 	-@${MPIEXEC}  -n 2 ./hogwild -info

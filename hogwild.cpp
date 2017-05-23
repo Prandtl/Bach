@@ -15,7 +15,9 @@ PetscErrorCode FormFunctionGradient(Tao,Vec,PetscReal*,Vec,void*);
 int main(int argc,char **argv)
 {
         PetscErrorCode ierr;                /* used to check for functions returning nonzeros */
-        PetscReal zero=0.0, lambda=0.1, *xinitial, delta_norm=0.0;
+        PetscReal zero=0.0, lambda=0.1, *xlocal, delta_norm=0.0;
+        PetscReal xinitial[] = {11.0, -7.0};
+        PetscInt rstart, rend, i;
         Vec x, x_old, delta;                              /* solution vector */
         Tao tao;                            /* Tao solver context */
         PetscBool flg;
@@ -32,6 +34,10 @@ int main(int argc,char **argv)
         ierr = PetscInitialize(&argc,&argv,(char*)0,help); if (ierr) return ierr;
         ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size); CHKERRQ(ierr);
         ierr = MPI_Comm_rank(PETSC_COMM_WORLD,&rank); CHKERRQ(ierr);
+
+        /*  create viewer */
+        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "hogwild.out", &viewer); CHKERRQ(ierr);
+        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
 
         /* Initialize problem parameters */
         user.alpha = 0.01;
@@ -56,10 +62,14 @@ int main(int argc,char **argv)
 
         /* Set solution vec and an initial guess */
         ierr = VecSet(x, zero); CHKERRQ(ierr);
-        ierr = VecGetArray(x, &xinitial); CHKERRQ(ierr);
-        xinitial[0]=11.0;
-        xinitial[1]=7.0;
-        ierr = VecRestoreArray(x, &xinitial); CHKERRQ(ierr);
+
+        VecGetOwnershipRange(x, &rstart, &rend);
+        VecGetArray(x, &xlocal);
+        for (i = rstart; i < rend; i++) {
+                xlocal[i] = xinitial[i];
+        }
+        VecRestoreArray(x,&xlocal);
+
         ierr = TaoSetInitialVector(tao,x); CHKERRQ(ierr);
         ierr = VecSet(x_old, zero); CHKERRQ(ierr);
         ierr = VecSet(delta, zero); CHKERRQ(ierr);
@@ -71,9 +81,7 @@ int main(int argc,char **argv)
         /* Check for TAO command line options */
         ierr = TaoSetFromOptions(tao); CHKERRQ(ierr);
 
-        /*  create viewer */
-        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "hogwild.out", &viewer); CHKERRQ(ierr);
-        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
+
 
         /*solve*/
         iter = 0;
