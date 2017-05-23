@@ -20,7 +20,7 @@ example: example.o chkopts
 	-${CLINKER} -o  example example.o ${PETSC_LIB}
 	${RM} example.o
 
-runExample:
+runExample: example
 	-@${MPIEXEC}  -n 1 ./example -info
 
 runShowExample: example
@@ -31,7 +31,7 @@ hogwild: hogwild.o chkopts
 	-${CLINKER} -o  hogwild hogwild.o ${PETSC_LIB}
 	${RM} hogwild.o
 
-runHogwild:
+runHogwild: hogwild
 	-@${MPIEXEC}  -n 2 ./hogwild -info
 
 runShowHogwild: hogwild
