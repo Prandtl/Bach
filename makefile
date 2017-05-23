@@ -1,10 +1,10 @@
-ALL: toast, example
+ALL: toast, example, hogwild
 
 CFLAGS =
 FFLAGS =
 CPPFLAGS =
 FPPFLAGS =
-CLEANFILES = toast, example, example.out
+CLEANFILES = toast, example, example.out, hogwild, hogwild.out
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
@@ -26,3 +26,14 @@ runExample:
 runShowExample: example
 	-@${MPIEXEC}  -n 1 ./example -info
 	python3 ariadna.py example.out
+
+hogwild: hogwild.o chkopts
+	-${CLINKER} -o  hogwild hogwild.o ${PETSC_LIB}
+	${RM} hogwild.o
+
+runHogwild:
+	-@${MPIEXEC}  -n 1 ./hogwild -info
+
+runShowHogwild: hogwild
+	-@${MPIEXEC}  -n 2 ./hogwild -info
+	python3 ariadna.py hogwild.out
