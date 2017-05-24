@@ -7,6 +7,7 @@ static char help[] = "using tao to solve x^2 + (x-y)^2";
 typedef struct {
         PetscReal alpha;
         PetscInt maxIter;
+        PetscReal lambda;
 } AppCtx;
 
 /* -------------- User-defined routines ---------- */
@@ -15,7 +16,7 @@ PetscErrorCode FormFunctionGradient(Tao,Vec,PetscReal*,Vec,void*);
 int main(int argc,char **argv)
 {
         PetscErrorCode ierr;                /* used to check for functions returning nonzeros */
-        PetscReal zero=0.0, lambda=0.01, *xinitial, delta_norm=0.0;
+        PetscReal zero=0.0, *xinitial, delta_norm=0.0;
         Vec x, x_old, delta;                              /* solution vector */
         Tao tao;                            /* Tao solver context */
         PetscBool flg;
@@ -35,7 +36,8 @@ int main(int argc,char **argv)
 
         /* Initialize problem parameters */
         user.alpha = 0.01;
-        user.maxIter = 5000;
+        user.lambda = 0.01;
+        user.maxIter = 50;
         /* Check for command line arguments to override defaults */
         ierr = PetscOptionsGetReal(NULL,NULL,"-alpha",&user.alpha,&flg); CHKERRQ(ierr);
 
@@ -78,7 +80,7 @@ int main(int argc,char **argv)
                 VecView(x, viewer);
                 ierr = VecCopy(x, x_old); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
-                ierr = VecAXPY(x, -lambda, G); CHKERRQ(ierr);
+                ierr = VecAXPY(x, -user.lambda, G); CHKERRQ(ierr);
                 ierr = VecWAXPY(delta, -1, x_old, x); CHKERRQ(ierr); // delta = x - x_old
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
 
