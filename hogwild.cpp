@@ -16,8 +16,8 @@ int main(int argc,char **argv)
 {
         PetscErrorCode ierr;                /* used to check for functions returning nonzeros */
         PetscReal zero=0.0, lambda=0.1, *xlocal, delta_norm=0.0;
-        PetscReal xinitial[] = {11.0, -7.0};
-        PetscInt rstart, rend, i;
+        PetscReal xinitial[] = {11.0, -7.0, 5};
+        PetscInt rstart, rend, i, N=2;
         Vec x, x_old, delta;                              /* solution vector */
         Tao tao;                            /* Tao solver context */
         PetscBool flg;
@@ -37,7 +37,7 @@ int main(int argc,char **argv)
 
         /*  create viewer */
         ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "hogwild.out", &viewer); CHKERRQ(ierr);
-        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
+        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_PYTHON);
 
         /* Initialize problem parameters */
         user.alpha = 0.01;
@@ -47,13 +47,13 @@ int main(int argc,char **argv)
 
         /* Allocate vectors for the solution and gradient */
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &x); CHKERRQ(ierr);
-        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, 2, &x); CHKERRQ(ierr);
+        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x); CHKERRQ(ierr);
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &x_old); CHKERRQ(ierr);
-        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, 2, &x_old); CHKERRQ(ierr);
+        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x_old); CHKERRQ(ierr);
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &delta); CHKERRQ(ierr);
-        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, 2, &delta); CHKERRQ(ierr);
+        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &delta); CHKERRQ(ierr);
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &G); CHKERRQ(ierr);
-        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, 2, &G); CHKERRQ(ierr);
+        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &G); CHKERRQ(ierr);
 
         /* The TAO code begins here */
         /* Create TAO solver with desired solution method */
@@ -62,13 +62,24 @@ int main(int argc,char **argv)
 
         /* Set solution vec and an initial guess */
         ierr = VecSet(x, zero); CHKERRQ(ierr);
+        VecView(x, viewer);
 
         VecGetOwnershipRange(x, &rstart, &rend);
+        PetscInfo1(NULL, "rstart: %i\n", rstart);
+        PetscInfo1(NULL, "rend: %i\n", rend);
+
         VecGetArray(x, &xlocal);
         for (i = rstart; i < rend; i++) {
-                xlocal[i] = xinitial[i];
+                // xlocal[i] = xinitial[i];
+                // v    = (PetscReal)(rank*i);
+                VecSetValues(x,1,&i,&xinitial[i],INSERT_VALUES );
         }
-        VecRestoreArray(x,&xlocal);
+        VecAssemblyBegin(x);
+        VecAssemblyEnd(x);
+
+        // VecRestoreArray(x,&xlocal);
+
+        VecView(x, PETSC_VIEWER_STDOUT_WORLD);
 
         ierr = TaoSetInitialVector(tao,x); CHKERRQ(ierr);
         ierr = VecSet(x_old, zero); CHKERRQ(ierr);
@@ -127,8 +138,8 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         ff = PetscSqr(x[0]) + PetscSqr(x[0] - x[1]);
 
         /* Compute G(X) */
-        g[0]=4*x[0] - 2*x[1];
-        g[1]=-2*x[0] + 2*x[1];
+        g[0] = 4*x[0] - 2*x[1];
+        g[1] = -2*x[0] + 2*x[1];
 
         /* Restore vectors */
         ierr = VecRestoreArray(X,&x); CHKERRQ(ierr);
