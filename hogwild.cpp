@@ -44,8 +44,8 @@ int main(int argc,char **argv)
         PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_PYTHON);
         /* Initialize problem parameters */
         user.alpha = 0.01;
-        user.maxIter = 50;
-        user.lambda = 0.01;
+        user.lambda = 0.05;
+        user.maxIter = 5000;
 
         /* Check for command line arguments to override defaults */
         ierr = PetscOptionsGetReal(NULL,NULL,"-alpha",&user.alpha,&flg); CHKERRQ(ierr);
@@ -98,6 +98,7 @@ int main(int argc,char **argv)
         iter = 0;
 
         do {
+                PetscInfo1(NULL, "iteration: %i\n", iter);
                 VecView(x, viewer);
                 ierr = VecCopy(x, xOld); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
@@ -111,12 +112,14 @@ int main(int argc,char **argv)
                 VecRestoreArray(antiG, &antigLocal);
                 VecAssemblyBegin(x);
                 VecAssemblyEnd(x);
-                //  ierr = VecAXPY(x, -lambda, G); CHKERRQ(ierr);
-                // ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr); // delta = x - xOld
-                // ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
 
-                PetscInfo1(NULL, "iteration: %i\n", iter);
-                PetscInfo1(NULL, "delta: %g\n", delta_norm);
+                VecView(x,PETSC_VIEWER_STDOUT_WORLD);
+                VecView(xOld,PETSC_VIEWER_STDOUT_WORLD);
+
+                ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr); // delta = x - xOld
+                ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
+
+                // PetscInfo1(NULL, "delta: %g\n", delta_norm);
 
                 iter+=1;
                 if(iter>user.maxIter)
@@ -129,7 +132,7 @@ int main(int argc,char **argv)
         ierr = TaoDestroy(&tao); CHKERRQ(ierr);
         ierr = VecDestroy(&x); CHKERRQ(ierr);
         ierr = VecDestroy(&G); CHKERRQ(ierr);
-        PetscViewerPopFormat(viewer);
+        ierr = PetscViewerPopFormat(viewer); CHKERRQ(ierr);
         ierr = PetscViewerDestroy(&viewer); CHKERRQ(ierr);
 
         ierr = PetscFinalize();
@@ -172,20 +175,12 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         g[0] = 4*xreal[0] - 2*xreal[1];
         g[1] = -2*xreal[0] + 2*xreal[1];
 
-        PetscInfo2(NULL, "x[0]: %g, x[1]: %g \r\n", xreal[0], xreal[1]);
-        PetscInfo2(NULL, "g[0]: %g, g[1]: %g \r\n", g[0], g[1]);
+        // PetscInfo2(NULL, "x[0]: %g, x[1]: %g \r\n", xreal[0], xreal[1]);
+        // PetscInfo2(NULL, "g[0]: %g, g[1]: %g \r\n", g[0], g[1]);
 
         /* Restore vectors */
         ierr = VecRestoreArray(G,&g); CHKERRQ(ierr);
 
-        // VecGetArray(x, &xlocal);
-        // for (i = rstart; i < rend; i++) {
-        //         VecSetValues(x,1,&i,&xinitial[i],INSERT_VALUES );
-        // }
-        // VecAssemblyBegin(x);
-        // VecAssemblyEnd(x);
-
         *f=ff;
-
         return 0;
 }
