@@ -18,7 +18,7 @@ int main(int argc,char **argv)
         PetscReal zero=0.0, lambda=0.1, *xlocal, delta_norm=0.0;
         PetscReal xinitial[] = {11.0, 7.0, 5};
         PetscInt rstart, rend, i, N=2;
-        Vec x, x_old, delta;                              /* solution vector */
+        Vec x, xOld, delta;                              /* solution vector */
         Tao tao;                            /* Tao solver context */
         PetscBool flg;
         PetscMPIInt size,rank;                   /* number of processes running */
@@ -50,8 +50,8 @@ int main(int argc,char **argv)
         /* Allocate vectors for the solution and gradient */
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &x); CHKERRQ(ierr);
         ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x); CHKERRQ(ierr);
-        // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &x_old); CHKERRQ(ierr);
-        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x_old); CHKERRQ(ierr);
+        // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &xOld); CHKERRQ(ierr);
+        ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &xOld); CHKERRQ(ierr);
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &delta); CHKERRQ(ierr);
         ierr = VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &delta); CHKERRQ(ierr);
         // ierr = VecCreateSeq(PETSC_COMM_SELF, 2, &G); CHKERRQ(ierr);
@@ -64,7 +64,6 @@ int main(int argc,char **argv)
 
         /* Set solution vec and an initial guess */
         ierr = VecSet(x, zero); CHKERRQ(ierr);
-        VecView(x, viewer);
 
         VecGetOwnershipRange(x, &rstart, &rend);
         PetscInfo1(NULL, "rstart: %i\n", rstart);
@@ -72,19 +71,13 @@ int main(int argc,char **argv)
 
         VecGetArray(x, &xlocal);
         for (i = rstart; i < rend; i++) {
-                // xlocal[i] = xinitial[i];
-                // v    = (PetscReal)(rank*i);
                 VecSetValues(x,1,&i,&xinitial[i],INSERT_VALUES );
         }
         VecAssemblyBegin(x);
         VecAssemblyEnd(x);
 
-        // VecRestoreArray(x,&xlocal);
-
-        VecView(x, PETSC_VIEWER_STDOUT_WORLD);
-
         ierr = TaoSetInitialVector(tao,x); CHKERRQ(ierr);
-        ierr = VecSet(x_old, zero); CHKERRQ(ierr);
+        ierr = VecSet(xOld, zero); CHKERRQ(ierr);
         ierr = VecSet(delta, zero); CHKERRQ(ierr);
         ierr = VecSet(G, zero); CHKERRQ(ierr);
 
@@ -101,11 +94,12 @@ int main(int argc,char **argv)
 
         do {
                 VecView(x, viewer);
-                ierr = VecCopy(x, x_old); CHKERRQ(ierr);
+                ierr = VecCopy(x, xOld); CHKERRQ(ierr);
+                // VecView(xOld, PETSC_VIEWER_STDOUT_WORLD);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
-                VecView(G, localViewer);
+                // VecView(G, PETSC_VIEWER_STDOUT_WORLD);
                 ierr = VecAXPY(x, -lambda, G); CHKERRQ(ierr);
-                ierr = VecWAXPY(delta, -1, x_old, x); CHKERRQ(ierr); // delta = x - x_old
+                ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr); // delta = x - xOld
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
 
                 PetscInfo1(NULL, "iteration: %i\n", iter);
@@ -132,31 +126,43 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
 {
         PetscErrorCode ierr;
         PetscReal ff=0;
-        PetscReal           *x,*g;
+        PetscReal *x,*g;
+        PetscInt xsize, rstart, rend;
+
+        VecGetSize(X, &xsize);
+        PetscReal xreal[xsize];
 
         /* Get pointers to vector data */
         ierr = VecGetArray(X,&x); CHKERRQ(ierr);
+        VecGetOwnershipRange(X, &rstart, &rend);
+        int k = 0;
+        // PetscInfo2(NULL, "x[0]: %g, x[1]: %g \r\n", x[0], x[1]);
+        for(int i=0;i<xsize;i++)
+        {
+          xreal[i] = rstart<=i && i<rend?x[k]:0;
+          PetscInfo2(NULL, "x[k]: %g, k: %g \r\n", x[k], k);
+          k++;
+        }
+        PetscInfo2(NULL, "x[0]: %g, x[1]: %g \r\n", xreal[0], xreal[1]);
+        ierr = VecRestoreArray(X,&x); CHKERRQ(ierr);
+
         ierr = VecGetArray(G,&g); CHKERRQ(ierr);
         /* Compute f(x) */
-        ff = PetscSqr(x[0]) + PetscSqr(x[0] - x[1]);
+        ff = PetscSqr(xreal[0]) + PetscSqr(xreal[0] - xreal[1]);
 
         /* Compute G(X) */
-        g[0] = 4*x[0] - 2*x[1];
-        g[1] = -2*x[0] + 2*x[1];
+        g[0] = 4*xreal[0] - 2*xreal[1];
+        g[1] = -2*xreal[0] + 2*xreal[1];
 
-        PetscInfo2(NULL, "x[0]: %g, x[1]: %g", x[0], x[1]);
+        // PetscInfo2(NULL, "g[0]: %g, g[1]: %g \r\n", g[0], g[1]);
 
         /* Restore vectors */
-        ierr = VecRestoreArray(X,&x); CHKERRQ(ierr);
         ierr = VecRestoreArray(G,&g); CHKERRQ(ierr);
 
         // VecGetArray(x, &xlocal);
         // for (i = rstart; i < rend; i++) {
-        //         // xlocal[i] = xinitial[i];
-        //         // v    = (PetscReal)(rank*i);
         //         VecSetValues(x,1,&i,&xinitial[i],INSERT_VALUES );
         // }
-        //
         // VecAssemblyBegin(x);
         // VecAssemblyEnd(x);
 
