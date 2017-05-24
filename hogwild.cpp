@@ -16,7 +16,7 @@ int main(int argc,char **argv)
 {
         PetscErrorCode ierr;                /* used to check for functions returning nonzeros */
         PetscReal zero=0.0, lambda=0.1, *xlocal, delta_norm=0.0;
-        PetscReal xinitial[] = {11.0, -7.0, 5};
+        PetscReal xinitial[] = {11.0, 7.0, 5};
         PetscInt rstart, rend, i, N=2;
         Vec x, x_old, delta;                              /* solution vector */
         Tao tao;                            /* Tao solver context */
@@ -28,7 +28,7 @@ int main(int argc,char **argv)
         PetscReal f;
         Vec G;
 
-        PetscViewer viewer;
+        PetscViewer viewer, localViewer;
 
         /* Initialize TAO and PETSc */
         ierr = PetscInitialize(&argc,&argv,(char*)0,help); if (ierr) return ierr;
@@ -37,8 +37,10 @@ int main(int argc,char **argv)
 
         /*  create viewer */
         ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "hogwild.out", &viewer); CHKERRQ(ierr);
-        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_PYTHON);
+        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
 
+        ierr = PetscViewerASCIIOpen(PETSC_COMM_SELF, "helper.out", &localViewer); CHKERRQ(ierr);
+        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_PYTHON);
         /* Initialize problem parameters */
         user.alpha = 0.01;
         user.maxIter = 5000;
@@ -101,6 +103,7 @@ int main(int argc,char **argv)
                 VecView(x, viewer);
                 ierr = VecCopy(x, x_old); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
+                VecView(G, localViewer);
                 ierr = VecAXPY(x, -lambda, G); CHKERRQ(ierr);
                 ierr = VecWAXPY(delta, -1, x_old, x); CHKERRQ(ierr); // delta = x - x_old
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
@@ -141,9 +144,22 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         g[0] = 4*x[0] - 2*x[1];
         g[1] = -2*x[0] + 2*x[1];
 
+        PetscInfo2(NULL, "x[0]: %g, x[1]: %g", x[0], x[1]);
+
         /* Restore vectors */
         ierr = VecRestoreArray(X,&x); CHKERRQ(ierr);
         ierr = VecRestoreArray(G,&g); CHKERRQ(ierr);
+
+        // VecGetArray(x, &xlocal);
+        // for (i = rstart; i < rend; i++) {
+        //         // xlocal[i] = xinitial[i];
+        //         // v    = (PetscReal)(rank*i);
+        //         VecSetValues(x,1,&i,&xinitial[i],INSERT_VALUES );
+        // }
+        //
+        // VecAssemblyBegin(x);
+        // VecAssemblyEnd(x);
+
         *f=ff;
 
         return 0;
