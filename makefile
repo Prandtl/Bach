@@ -34,6 +34,9 @@ hogwild: hogwild.o chkopts
 runHogwild: hogwild
 	-@${MPIEXEC}  -n 2 ./hogwild -info
 
+runSerialHogwild: hogwild
+	-@${MPIEXEC}  -n 1 ./hogwild -info
+
 runShowHogwild: hogwild
 	-@${MPIEXEC}  -n 2 ./hogwild -info
 	python3 ariadna.py hogwild.out
