@@ -67,7 +67,9 @@ vec = []
 vecs = []
 for line in f:
     trimmed = line.strip()
-    if re.match("^-?\d+?\.\d*?$", trimmed) is None:
+    if re.match("^Process",trimmed):
+        continue
+    if re.match("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$", trimmed) is None:
         if(len(vec)!=0):
             vecs.append(vec)
             vec=[]
