@@ -36,7 +36,7 @@ int main(int argc,char **argv)
 
         /* Initialize problem parameters */
         user.alpha = 0.01;
-        user.lambda = 0.01;
+        user.lambda = 0.05;
         user.maxIter = 5000;
         /* Check for command line arguments to override defaults */
         ierr = PetscOptionsGetReal(NULL,NULL,"-alpha",&user.alpha,&flg); CHKERRQ(ierr);
