@@ -93,21 +93,32 @@ h1 = plt.contour(xx4, xx5, zz3, 40)
 plt.subplot(224)
 h1 = plt.contour(xx6, xx7, zz4, 40)
 
-# f = open(filename, 'r')
-# vec = []
-# vecs = []
-# for line in f:
-#     trimmed = line.strip()
-#     if re.match("^Process",trimmed):
-#         continue
-#     if re.match("^[-+]?[0-9]*\.?([0-9]+)?([eE][-+]?[0-9]+)?$", trimmed) is None:
-#         if(len(vec)!=0):
-#             vecs.append(vec)
-#             vec=[]
-#     else:
-#         number = float(trimmed)
-#         vec.append(number)
-#
+f = open(filename, 'r')
+vec = []
+vecs = []
+for line in f:
+    trimmed = line.strip()
+    if re.match("^Process",trimmed):
+        continue
+    if re.match("^[-+]?[0-9]*\.?([0-9]+)?([eE][-+]?[0-9]+)?$", trimmed) is None:
+        if(len(vec)!=0):
+            vecs.append(vec)
+            vec=[]
+    else:
+        number = float(trimmed)
+        vec.append(number)
+
+coords = [list(x) for x in zip(*vecs)]
+
+plt.subplot(221)
+plt.plot(coords[0], coords[1], 'ro', coords[0], coords[1], 'k')
+plt.subplot(222)
+plt.plot(coords[2], coords[3], 'ro', coords[2], coords[3], 'k')
+plt.subplot(223)
+plt.plot(coords[4], coords[5], 'ro', coords[4], coords[5], 'k')
+plt.subplot(224)
+plt.plot(coords[6], coords[7], 'ro', coords[6], coords[7], 'k')
+
 # x_list = [x for [x, y] in vecs]
 # y_list = [y for [x, y] in vecs]
 #

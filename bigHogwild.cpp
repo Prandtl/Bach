@@ -169,8 +169,8 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         g[0] = 4*xreal[0] - 2*xreal[1];
         g[1] = -2*xreal[0] + 2*xreal[1];
 
-        g[2] = 0;
-        g[3] = 0;
+        g[2] = 4*xreal[2] - 2*xreal[3];
+        g[3] = -2*xreal[2] + 2*xreal[3];
 
         g[4] = 0;
         g[5] = 0;

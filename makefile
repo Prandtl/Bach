@@ -45,5 +45,5 @@ bigHog: bigHogwild.o chkopts
 		-${CLINKER} -o  bigHogwild bigHogwild.o ${PETSC_LIB}
 		${RM} bigHogwild.o
 
-runHogwild: bigHog
-	-@${MPIEXEC}  -n 2 ./bigHogwild -info
+runBigHog: bigHog
+	-@${MPIEXEC} -n 2 ./bigHogwild -info
