@@ -40,3 +40,10 @@ runSerialHogwild: hogwild
 runShowHogwild: hogwild
 	-@${MPIEXEC}  -n 2 ./hogwild -info
 	python3 ariadna.py hogwild.out
+
+bigHog: bigHogwild.o chkopts
+		-${CLINKER} -o  bigHogwild bigHogwild.o ${PETSC_LIB}
+		${RM} bigHogwild.o
+
+runHogwild: bigHog
+	-@${MPIEXEC}  -n 2 ./bigHogwild -info

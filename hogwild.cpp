@@ -29,7 +29,7 @@ int main(int argc,char **argv)
         PetscReal f;
         Vec G, antiG, minusLambda;
 
-        PetscViewer viewer, localViewer;
+        PetscViewer viewer;
 
         /* Initialize TAO and PETSc */
         ierr = PetscInitialize(&argc,&argv,(char*)0,help); if (ierr) return ierr;
@@ -39,9 +39,7 @@ int main(int argc,char **argv)
         /*  create viewer */
         ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "hogwild.out", &viewer); CHKERRQ(ierr);
         PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
-
-        ierr = PetscViewerASCIIOpen(PETSC_COMM_SELF, "helper.out", &localViewer); CHKERRQ(ierr);
-        PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_PYTHON);
+        
         /* Initialize problem parameters */
         user.alpha = 0.01;
         user.lambda = 0.05;
