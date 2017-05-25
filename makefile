@@ -47,3 +47,7 @@ bigHog: bigHogwild.o chkopts
 
 runBigHog: bigHog
 	-@${MPIEXEC} -n 2 ./bigHogwild -info
+
+runShowBigHog: bigHog
+	-@${MPIEXEC} -n 8 ./bigHogwild -info
+	python3 ariadna-big.py bigHogwild.out
