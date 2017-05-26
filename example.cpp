@@ -70,7 +70,7 @@ int main(int argc,char **argv)
         ierr = TaoSetFromOptions(tao); CHKERRQ(ierr);
 
         /*  create viewer */
-        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "example.out", &viewer); CHKERRQ(ierr);
+        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "bin/example.out", &viewer); CHKERRQ(ierr);
         PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
 
         /*solve*/

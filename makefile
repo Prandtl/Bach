@@ -10,44 +10,44 @@ include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
 
 toast: toast.o chkopts
-	-${CLINKER} -o  toast toast.o ${PETSC_LIB}
+	-${CLINKER} -o  bin/toast toast.o ${PETSC_LIB}
 	${RM} toast.o
 
 runToast:
 	-@${MPIEXEC}  -n 2 ./toast
 
 example: example.o chkopts
-	-${CLINKER} -o  example example.o ${PETSC_LIB}
+	-${CLINKER} -o  bin/example example.o ${PETSC_LIB}
 	${RM} example.o
 
 runExample: example
-	-@${MPIEXEC}  -n 1 ./example -info
+	-@${MPIEXEC}  -n 1 bin/example -info
 
 runShowExample: example
-	-@${MPIEXEC}  -n 1 ./example -info
-	python3 ariadna.py example.out
+	-@${MPIEXEC}  -n 1 bin/example -info
+	python3 ariadna.py bin/example.out
 
 hogwild: hogwild.o chkopts
-	-${CLINKER} -o  hogwild hogwild.o ${PETSC_LIB}
+	-${CLINKER} -o  bin/hogwild hogwild.o ${PETSC_LIB}
 	${RM} hogwild.o
 
 runHogwild: hogwild
-	-@${MPIEXEC}  -n 2 ./hogwild -info
+	-@${MPIEXEC}  -n 2 bin/hogwild -info
 
 runSerialHogwild: hogwild
-	-@${MPIEXEC}  -n 1 ./hogwild -info
+	-@${MPIEXEC}  -n 1 bin/hogwild -info
 
 runShowHogwild: hogwild
-	-@${MPIEXEC}  -n 2 ./hogwild -info
-	python3 ariadna.py hogwild.out
+	-@${MPIEXEC}  -n 2 bin/hogwild -info
+	python3 ariadna.py bin/hogwild.out
 
 bigHog: bigHogwild.o chkopts
-		-${CLINKER} -o  bigHogwild bigHogwild.o ${PETSC_LIB}
+		-${CLINKER} -o  bin/bigHogwild bigHogwild.o ${PETSC_LIB}
 		${RM} bigHogwild.o
 
 runBigHog: bigHog
-	-@${MPIEXEC} -n 2 ./bigHogwild -info
+	-@${MPIEXEC} -n 2 bin/bigHogwild -info
 
 runShowBigHog: bigHog
-	-@${MPIEXEC} -n 8 ./bigHogwild -info
-	python3 ariadna-big.py bigHogwild.out
+	-@${MPIEXEC} -n 8 bin/bigHogwild -info
+	python3 ariadna-big.py bin/bigHogwild.out

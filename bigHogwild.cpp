@@ -37,7 +37,7 @@ int main(int argc,char **argv)
         ierr = MPI_Comm_rank(PETSC_COMM_WORLD, &rank); CHKERRQ(ierr);
 
         /*  create viewer */
-        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "bigHogwild.out", &viewer); CHKERRQ(ierr);
+        ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD, "bin/bigHogwild.out", &viewer); CHKERRQ(ierr);
         PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_COMMON);
         /* Initialize problem parameters */
         user.alpha = 0.01;
