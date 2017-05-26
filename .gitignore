@@ -1,2 +1,4 @@
 /bin
+bach_thesis/*
+!bach_thesis/thesis.tex
 *.out
