@@ -1,22 +1,25 @@
-ALL: toast, example, hogwild
+ALL: toast, example, hogwild, bigHogwild
 
 CFLAGS =
 FFLAGS =
 CPPFLAGS =
 FPPFLAGS =
-CLEANFILES = toast, example, example.out, hogwild, hogwild.out
+CLEANFILES = 
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
 
-toast: toast.o chkopts
+binFolder:
+	mkdir -p bin
+
+toast: toast.o chkopts binFolder
 	-${CLINKER} -o  bin/toast toast.o ${PETSC_LIB}
 	${RM} toast.o
 
-runToast:
-	-@${MPIEXEC}  -n 2 ./toast
+runToast: toast
+	-@${MPIEXEC}  -n 2 bin/toast
 
-example: example.o chkopts
+example: example.o chkopts binFolder
 	-${CLINKER} -o  bin/example example.o ${PETSC_LIB}
 	${RM} example.o
 
@@ -27,7 +30,7 @@ runShowExample: example
 	-@${MPIEXEC}  -n 1 bin/example -info
 	python3 ariadna.py bin/example.out
 
-hogwild: hogwild.o chkopts
+hogwild: hogwild.o chkopts binFolder
 	-${CLINKER} -o  bin/hogwild hogwild.o ${PETSC_LIB}
 	${RM} hogwild.o
 
@@ -41,7 +44,7 @@ runShowHogwild: hogwild
 	-@${MPIEXEC}  -n 2 bin/hogwild -info
 	python3 ariadna.py bin/hogwild.out
 
-bigHog: bigHogwild.o chkopts
+bigHog: bigHogwild.o chkopts binFolder
 		-${CLINKER} -o  bin/bigHogwild bigHogwild.o ${PETSC_LIB}
 		${RM} bigHogwild.o
 
@@ -51,3 +54,6 @@ runBigHog: bigHog
 runShowBigHog: bigHog
 	-@${MPIEXEC} -n 8 bin/bigHogwild -info
 	python3 ariadna-big.py bin/bigHogwild.out
+
+rmBinaries:
+	rm -rf bin
