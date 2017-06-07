@@ -6,6 +6,7 @@
 \usepackage{amsthm}
 \usepackage{cite}
 \usepackage[pdftex]{graphicx}
+\usepackage{listings}
 
 \textheight 24cm
 \voffset -2cm
@@ -190,14 +191,120 @@
   \section{Adagrad}
   \section{Adadelta и RMSProp}
   \section{ADAM}
-  
+
   \chapter{Библиотека PETSc}
-  {TODO}
+  \section{PETSc}
+  PETSc (Portable Extensible Toolkit for Scientific computation) - набор
+  библиотек предназначенных для параллельного решения систем уравнений,
+  возникающих при дискретизации уравнений в частных производных, а также для
+  поиска решений нелинейных систем обыкновенных дифференциальных уравнений.
+  PETSc использует технологию MPI для параллелизации, а также поддерживает
+  параллельные вычисления на GPU с использованием CUDA и OpenCL. Основными
+  языками для разработки с использованием PETSc являются C, C++.
+  Существуют также интерфейсы для разных других языков в том числе Fortran,
+  Python, Java, Matlab.
+
+  Преимуществом при использовании PETSc является наличие готовой реализации
+  объектов и алгоритмов позволяющих работать с векторами и матрицами параллельно.
+  Также плюсом PETSc является модульная система, в которой можно заменять и
+  дополнять части библиотеки своими реализациями.
+
+  \section{TAO}
+  Одной из библиотек, которые входят в PETSc является TAO. TAO (The Toolkit for
+  Advanced Optimization) - библиотека, в которой реализованы алгоритмы для
+  решения задач оптимизации.
+
+  Большинство приложений использующих TAO идут по одному и тому же пути: пользователь
+  создает объект, отражающий контекст задачи и выбирает алгоритм оптимизации.
+  Затем задаёт необходимые для решения задачи функции: целевую функцию, функцию,
+  вычисляющую её градиент и Гессиан (матрица, образованная вторыми частными
+  производными функции). Затем пользователь включает tao solver (объект который
+  является абстракцией алгоритма оптимизации) и после получения результата уничтожает
+  созданные объекты.
+
+  Объект tao, являющийся по сути контекстом, содержит в себе метаданные: в нем
+  можно задать алгоритм минимизации, задать условие остановки и разные другие
+  переменные относящиеся к процессу решения задачи.
+
+  TAO позволяет добавлять свои методы оптимизации. Добавляемый метод должен быть
+  написан на C/C++ и содержать некоторый набор функций, описывающих жизненный цикл
+  алгоритма оптимизации: создание, уничтожение, настройка, вывод информации для
+  пользователя. За это отвечают следующие функции:
+  \begin{lstlisting}[language=C, frame=single]
+  PetscErrorCode TaoCreate_CG(Tao tao);
+  PetscErrorCode TaoDestroy_CG(TAO_SOLVER tao);
+  PetscErrorCode TaoSetFromOptions_CG(Tao tao, void *solver);
+  PetscErrorCode TaoSetUp_CG(Tao tao);
+  PetscErrorCode TaoView_CG(Tao tao, PetscViewer viewer);
+  \end{lstlisting}
+
+  Новый метод нужно будет зарегистрировать в PETSc с помощью соответствующей
+  процедуры и затем можно будет запускать программы с новым методом, используя
+  ключ \verb|-tao_type|. Например:
+
+  \verb|./minsurf2 -tao_type stochastic_gd -tao_cg fr -tao_smonitor|
+
+  Если под названием \verb|stochastic_gd| был зарегистрирован метод стохастического
+  градиентного спуска, то эта команда запустит исполняемый файл minsurf2,
+  написанный с помощью функций библиотеки PETSc с использованием стохастического
+  градиентного спуска в качестве алгоритма минимизации.
+
+  Не смотря на наличие хорошей и подробной документации в PETSc и TAO, та часть
+  документации, которая описывает создание собственного метода оптимизации содержит
+  довольно много ошибок и неточностей, что создает определенные проблемы при
+  написании своей реализации метода оптимизации.
 
   \chapter{Заключение}
   {TODO}
 
   \chapter{Список литературы}
-  {TODO}
+  \begin{enumerate}
+    \item
+    Hogwild!: A Lock-Free Approach to Parallelizing Stochastic Gradient Descent/
+    Feng Niu, Benjamin Recht, Christopher Re and Stephen J. Wright//
+    Computer Sciences Department, University of Wisconsin-Madison, June 2011 - URL:\\
+    https://people.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf
+    \item
+    An overview of gradient descent optimization algorithms/
+    Sebastian Ruder//
+    Insight Centre for Data Analytics, NUI Galway Aylien Ltd., Dublin, 2016 - URL:\\
+    http://sebastianruder.com/optimizing-gradient-descent/index.html
+    \item
+    Gradient descent for machine learning/
+    Jason Brownlee//
+    March, 2016 - URL:\\
+    http://machinelearningmastery.com/gradient-descent-for-machine-learning/
+    \item
+    Identifying and attacking the saddle point problem in high-dimensional
+    non-convex optimization./
+    Dauphin Y., Pascanu R., Gulcehre C., Cho K., Ganguli S., and Bengio Y.//
+    2014 - URL:\\
+    http://arxiv.org/abs/1406.2572
+    \item
+    Convolutional neural networks for visual recognition/
+    Andrej Karpathy//
+    Stanford - 2016 - URL:\\
+    http://cs231n.github.io/neural-networks-3/
+    \item
+    Методы оптимизации нейронных сетей/
+    Павел Садовников//
+    2017 - URL:\\
+    https://habrahabr.ru/post/318970/
+    \item
+    Stochastic gradient descent./
+    Wikipedia//
+    URL:\\
+    https://en.wikipedia.org/wiki/Stochastic\_gradient\_descent
+    \item
+    PETSc Users Manual/
+    S. Balay et al.//
+    Argonne National Laboratory - April 2016 - URL:\\
+    http://www.mcs.anl.gov/petsc/petsc-current/docs/manual.pdf
+    \item
+    TAO 3.7 Users Manual/
+    Todd Munson, Jason Sarich, Sefan Wild, Steven Benson, Lois Curfman McInnes//
+    Argonne National Laboratory - April 2017 - URL:\\
+    http://www.mcs.anl.gov/petsc/petsc-current/docs/tao\_manual.pdf
+  \end{enumerate}
 
 \end{document}
