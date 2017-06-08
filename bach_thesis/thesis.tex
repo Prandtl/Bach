@@ -204,6 +204,87 @@
       return new
   \end{lstlisting}
 
+  Этот метод принимает массив \verb|old| - точку в которой мы находимся и
+  \verb|lambd| - параметр который отвечает за величину шага. Здесь и далее метод
+  \verb|get_gradient| - метод который позволяет найти значение градиента в точке.
+
+  Используя эту реализацию шага градиентного спуска мы получаем следующую
+  реализацию самого градиентного спуска:
+
+  \begin{lstlisting}[language=Python, frame=single]
+    x = np.arange(-2, 2, 0.1)
+    y = np.arange(-2, 2, 0.1)
+    xx, yy = np.meshgrid(x, y)
+    xravel = np.ravel(xx)
+    yravel = np.ravel(yy)
+    points = list(zip(xravel, yravel))
+    f, g, a = getTestData(1e-10)
+    z = np.array([ f(point) for point in points ])
+    zz = z.reshape(xx.shape)
+    h = plt.contour(xx, yy, zz, 40)
+    old = [1,1]
+    delta = 1
+    while delta>1e-5:
+      new = gradient_descent_step(old, 0.001)
+      plt.plot([old[0], new[0]], [old[1], new[1]], 'r-', lw=1)
+      old = new
+      delta = old - new
+  \end{lstlisting}
+
+  Чтобы нарисовать график функции и путь по которму пойдет градиентный спуск
+  нужно получить двухмерный массив точек, с которым мы будем оперировать. Метод
+  \verb|np.arange(a, b, h)| возвращает вектор элементов от \verb|a| до \verb|b|,
+  \verb|с| шагом \verb|h|. Затем метод \verb|np.meshgrid(x, y)| возвращает две
+  матрицы \verb|xx, yy|. Строки \verb|xx|, равны вектору \verb|x|, количество
+  этих строк равно длине вектора \verb|y|, матрица \verb|yy| получается подобным
+  образом. Метод \verb|np.ravel(xx)| преобразовывает матрицу обратно в вектор,
+  подставляя друг за другом строки матрицы \verb|xx|. \verb|list(zip(xravel, yravel))|
+  возвращает список пар элементов \verb|xravel| и \verb|yravel|. В итоге,
+  например если \verb|x = [0, 0.1, … , 1]| и \verb|y = [-1, -0.9, … , 1]|, то
+  \verb|points| будет равно
+  \begin{center}
+    \begin{verbatim}
+      [(-1, 0), (-1, 0.1), … ,(-1, 1),
+      (-0.9, 0), (-0.9, 0.1), …(-0.9, 1),
+      …,
+      (1, 0), (1, 0.1), … ,(1, 1)].
+    \end{verbatim}
+  \end{center}
+	Метод \verb|getTestData| возвращает тестовую функцию, а так же функцию для
+  получения градиента и антиградиента. Зная нашу тестовую функцию и имея список
+  точек можно найти значение функции в каждой точке:
+  \verb|np.array([ f(point) for point in points ])|, далее, для удобства, этот
+  массив мы преобразуем в матрицу с размерами матрицы \verb|xx|. Далее происходит
+  иницализация параметров и мы попадаем в основной цикл: алгоритм будет двигаться
+  по градиенту пока величина шага не станет значительно мала, отрисовывая на
+  каждом шаге пройденное расстояние.
+
+  Далее будут рассмотрены реализации шага градиентного спуска для разных модификаций,
+  реализация градиентного спуска рассматриваться не будет, так как отличается
+  лишь в деталях: изменяется количество параметров, которые необходимо
+  инициализировать и передать в функцию, совершающую шаг градиентного спуска.
+	Шаг градиентного спуска с импульсом будет выглядеть следующим обрразом:
+
+  \begin{lstlisting}[language=Python, frame=single]
+    def gradient_descent_momentum_step(old, vt, lambd, mu):
+      vt_new = mu * vt + lambd * get_gradient(old)
+      new = old - vt_new
+      return (new, vt_new)
+  \end{lstlisting}
+
+  По сравнению с обычным градиентным спуском добавились параметры \verb|vt| -
+  значение \verb|v| на $j$-ом шаге и $mu$ - значение $\mu$ из формулы :
+  $$v^{j+1}=v^j-\mu\nabla F(x^j)$$
+
+	Шаг для алгоритма Нестерова отличается незначительно:
+
+  \begin{lstlisting}[language=Python, frame=single]
+    def gradient_descent_momentum_step(old, vt, lambd, mu):
+      vt_new = mu * vt + lambd * get_gradient(old - mu * vt)
+      new = old - vt_new
+      return (new, vt_new)
+  \end{lstlisting}
+
   \chapter{Библиотека PETSc}
   \section{PETSc}
   PETSc (Portable Extensible Toolkit for Scientific computation) - набор
