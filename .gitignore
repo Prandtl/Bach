@@ -1,4 +1,5 @@
 /bin
 bach_thesis/*
 !bach_thesis/thesis.tex
+!bach_thesis/questions.md
 *.out
