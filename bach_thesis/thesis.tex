@@ -192,6 +192,18 @@
   \section{Adadelta и RMSProp}
   \section{ADAM}
 
+  \chapter{Реализация градиентного спуска на Python}
+  Рассмотрим реализацию градиентного спуска на языке Python, с использованием
+  библиотеки numpy.
+
+  Шаг градиентного спуска будет выглядеть следующим образом:
+
+  \begin{lstlisting}[language=Python, frame=single]
+    def gradient_descent_step(old, lambd):
+      new = old - get_gradient(old)*lambd
+      return new
+  \end{lstlisting}
+
   \chapter{Библиотека PETSc}
   \section{PETSc}
   PETSc (Portable Extensible Toolkit for Scientific computation) - набор
