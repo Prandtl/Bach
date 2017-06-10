@@ -4,7 +4,7 @@ Todos
 2. Add listings of source files in the end of tex file.
 3. Rewrite summer python examples.
 4. sgd parallelization
-  * Hogwild!
+  * ~~Hogwild!~~
   * Hogwild++
   * allreduce
   * AsySPCD
