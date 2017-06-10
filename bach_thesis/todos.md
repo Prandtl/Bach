@@ -5,10 +5,10 @@ Todos
 3. Rewrite summer python examples.
 4. sgd parallelization
   * ~~Hogwild!~~
-  * Hogwild++
-  * allreduce
+  * ~~Hogwild++~~
+  * AllReduce
   * AsySPCD
-  * ASGD
+  * ~~ASGD~~
   * SymGD
   * etc.
   * that hogwild/mini-batch mix

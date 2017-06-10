@@ -522,11 +522,23 @@
   сообщений между процессорами и ядрами. Тесты показывают, что \textsc{Hogwild++}
   обычно работает лучше чем \textsc{Hogwild!}, а в худшем случае показывает такие
   же результаты.
-  \section{AllReduce}
-  \section{AsySPCD}
-  \section{ASGD}
-  \section{SymGD}
-  \section{Our special mix}
+
+  \section{Асинхронный стохастический градиентный спуск}
+  Этот метод решает те же проблемы что и \textsc{Hogwild++}, но другим способом:
+  авторы предлагают использовать модель с асинхронной, односторонней коммуникацией,
+  в которой процессы, по завершении шага градиентного спуска, посылают свои
+  изменения, вне зависимости от статуса получателя. Получатель со своей стороны
+  добавляет полученные обновления, когда будет готов. В такой модели нет потерь
+  времени на ожидание процессами конца отправки или начала получения обновления.
+
+  В такой модели возникают новые проблемы: могут возникать условия гонок, когда
+  два разных источника будут передавать данные одному получателю и в результате
+  обновление одного из них будет перезаписано. Но, если мы опять же воспользуемся
+  условием разряженности решаемой задачи, такая ситуация не будет возникать достаточно
+  часто, чтобы алгоритм перестал работать.
+
+  % \section{SymGD}
+  % \section{Our special mix}
 
   \chapter{Библиотека PETSc}
   \section{PETSc}
@@ -598,11 +610,6 @@
   \addcontentsline{toc}{chapter}{Список литературы}
   \begin{enumerate}
     \item
-    Hogwild!: A Lock-Free Approach to Parallelizing Stochastic Gradient Descent/
-    Feng Niu, Benjamin Recht, Christopher Re and Stephen J. Wright//
-    Computer Sciences Department, University of Wisconsin-Madison, June 2011 - URL:\\
-    https://people.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf
-    \item
     An overview of gradient descent optimization algorithms/
     Sebastian Ruder//
     Insight Centre for Data Analytics, NUI Galway Aylien Ltd., Dublin, 2016 - URL:\\
@@ -634,6 +641,11 @@
     URL:\\
     https://en.wikipedia.org/wiki/Stochastic\_gradient\_descent
     \item
+    Hogwild!: A Lock-Free Approach to Parallelizing Stochastic Gradient Descent/
+    Feng Niu, Benjamin Recht, Christopher Re and Stephen J. Wright//
+    Computer Sciences Department, University of Wisconsin-Madison, June 2011 - URL:\\
+    https://people.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf
+    \item
     PETSc Users Manual/
     S. Balay et al.//
     Argonne National Laboratory - April 2016 - URL:\\
@@ -647,6 +659,8 @@
     {TODO: ilya sutskever PhD thesis}
     \item
     {TODO: hogwild++}
+    \item
+    {TODO: asgd}
   \end{enumerate}
 
 \end{document}
