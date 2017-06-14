@@ -27,12 +27,16 @@ def getTestFuncs():
     def testFunction3(point):
         x = point[0]
         y = point[1]
-        result = 3 * np.power(x - 20, 2) + 20 * x * y - np.power(x * y, 3)
+        x_sq = np.square(x)
+        second_comp = np.square(x - y)
+        result = x_sq + second_comp
         return result
     def testFunction4(point):
-        y = point[1]
         x = point[0]
-        result = 20 + np.power(x, 2) - 10 * np.cos(2 * np.pi * x) + np.power(y, 2) - 10 * np.cos(2 * np.pi * y)
+        y = point[1]
+        x_sq = np.square(x)
+        second_comp = np.square(x - y)
+        result = x_sq + second_comp
         return result
     return testFunction, testFunction2, testFunction3, testFunction4
 

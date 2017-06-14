@@ -164,6 +164,9 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         ierr = VecGetArray(G,&g); CHKERRQ(ierr);
         /* Compute f(x) */
         ff = PetscSqr(xreal[0]) + PetscSqr(xreal[0] - xreal[1]);
+        ff += PetscSqr(xreal[2]) + PetscSqr(xreal[2] - xreal[3]);
+        ff += PetscSqr(xreal[4]) + PetscSqr(xreal[4] - xreal[5]);
+        ff += PetscSqr(xreal[6]) + PetscSqr(xreal[6] - xreal[7]);
 
         /* Compute G(X) */
         g[0] = 4*xreal[0] - 2*xreal[1];
@@ -172,13 +175,18 @@ PetscErrorCode FormFunctionGradient(Tao tao,Vec X,PetscReal *f, Vec G,void *ptr)
         g[2] = 4*xreal[2] - 2*xreal[3];
         g[3] = -2*xreal[2] + 2*xreal[3];
 
+        g[4] = 4*xreal[4] - 2*xreal[5];
+        g[5] = -2*xreal[4] + 2*xreal[5];
+
+        g[6] = 4*xreal[6] - 2*xreal[7];
+        g[7] = -2*xreal[6] + 2*xreal[7];
+
         // g[4] = -3*PetscPowReal(xreal[4],2)*PetscPowReal(xreal[5],3) + 6*xreal[4] + 20*xreal[5] - 120;
         // g[5] = -3*PetscPowReal(xreal[4],3)*PetscPowReal(xreal[5],2) + 20*xreal[4];
-        g[4] = 0;
-        g[5] = 0;
-
-        g[6] = 2*xreal[6] + 20 * PETSC_PI * PetscSinReal(2 * PETSC_PI * xreal[6]);
-        g[7] = 2*xreal[7] + 20 * PETSC_PI * PetscSinReal(2 * PETSC_PI * xreal[7]);
+        // g[4] = 0;
+        // g[5] = 0;
+        // g[6] = 2*xreal[6] + 20 * PETSC_PI * PetscSinReal(2 * PETSC_PI * xreal[6]);
+        // g[7] = 2*xreal[7] + 20 * PETSC_PI * PetscSinReal(2 * PETSC_PI * xreal[7]);
 
         /* Restore vectors */
         ierr = VecRestoreArray(G,&g); CHKERRQ(ierr);
