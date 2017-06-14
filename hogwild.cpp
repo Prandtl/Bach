@@ -97,18 +97,19 @@ int main(int argc,char **argv)
                 ierr = VecCopy(x, xOld); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
                 ierr = VecPointwiseMult(antiG, G, minusLambda);
-                VecGetArray(x, &xlocal);
+
                 VecGetArray(antiG, &antigLocal);
 
-                for (i = 0; i < N; i++) {
+                for (i = rstart; i < rend; i++) {
                         VecSetValues(x, 1, &i, &antigLocal[i], ADD_VALUES );
                 }
 
                 VecView(antiG, PETSC_VIEWER_STDOUT_SELF);
 
-                VecRestoreArray(antiG, &antigLocal);
                 VecAssemblyBegin(x);
                 VecAssemblyEnd(x);
+
+                VecRestoreArray(antiG, &antigLocal);
 
                 ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr); // delta = x - xOld
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
