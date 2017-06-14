@@ -4,7 +4,7 @@ CFLAGS =
 FFLAGS =
 CPPFLAGS =
 FPPFLAGS =
-CLEANFILES = 
+CLEANFILES =
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
@@ -54,6 +54,12 @@ runBigHog: bigHog
 runShowBigHog: bigHog
 	-@${MPIEXEC} -n 8 bin/bigHogwild -info
 	python3 ariadna-big.py bin/bigHogwild.out
+
+thesis1: bigHog
+	-@${MPIEXEC} -n 1 bin/bigHogwild -log_summary
+
+thesis2: bigHog
+	-@${MPIEXEC} -n 1 bin/bigHogwild -log_summary
 
 rmBinaries:
 	rm -rf bin
