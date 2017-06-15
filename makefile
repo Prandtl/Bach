@@ -9,16 +9,6 @@ CLEANFILES =
 include ${PETSC_DIR}/lib/petsc/conf/variables
 include ${PETSC_DIR}/lib/petsc/conf/rules
 
-binFolder:
-	mkdir -p bin
-
-toast: toast.o chkopts binFolder
-	-${CLINKER} -o  bin/toast toast.o ${PETSC_LIB}
-	${RM} toast.o
-
-runToast: toast
-	-@${MPIEXEC}  -n 2 bin/toast
-
 example: example.o chkopts binFolder
 	-${CLINKER} -o  bin/example example.o ${PETSC_LIB}
 	${RM} example.o
@@ -29,6 +19,19 @@ runExample: example
 runShowExample: example
 	-@${MPIEXEC}  -n 1 bin/example -info
 	python3 ariadna.py bin/example.out
+
+
+binFolder:
+	mkdir -p bin
+
+toast: toast.o chkopts binFolder
+	-${CLINKER} -o  bin/toast toast.o ${PETSC_LIB}
+	${RM} toast.o
+
+runToast: toast
+	-@${MPIEXEC}  -n 2 bin/toast
+
+
 
 hogwild: hogwild.o chkopts binFolder
 	-${CLINKER} -o  bin/hogwild hogwild.o ${PETSC_LIB}

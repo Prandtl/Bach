@@ -98,8 +98,6 @@ int main(int argc,char **argv)
         PetscLogStageRegister("Work", &stage);
         PetscLogStagePush(stage);
         do {
-                // PetscInfo1(NULL, "----iteration: %i----------------------------------------------------\n", iter);
-                // VecView(x, viewer);
                 ierr = VecCopy(x, xOld); CHKERRQ(ierr);
                 ierr = FormFunctionGradient(tao, x, &f, G, &user); CHKERRQ(ierr);
                 ierr = VecPointwiseMult(antiG, G, minusLambda);
@@ -110,21 +108,16 @@ int main(int argc,char **argv)
                         VecSetValues(x, 1, &i, &antigLocal[i], ADD_VALUES );
                 }
 
-                // VecView(antiG, PETSC_VIEWER_STDOUT_SELF);
-
                 VecRestoreArray(antiG, &antigLocal);
                 VecAssemblyBegin(x);
                 VecAssemblyEnd(x);
 
-                ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr); // delta = x - xOld
+                ierr = VecWAXPY(delta, -1, xOld, x); CHKERRQ(ierr);
                 ierr = VecNorm(delta, NORM_2, &delta_norm); CHKERRQ(ierr);
-
-                // VecView(delta, PETSC_VIEWER_STDOUT_WORLD);
 
                 iter+=1;
                 if(iter>user.maxIter)
                 {
-                        //PetscInfo1(NULL, "did not converge in maxIter (%i) iterations\n", user.maxIter);
                         break;
                 }
         } while(delta_norm > user.alpha);
